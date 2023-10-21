@@ -8,7 +8,8 @@ import java.util.*;
 public class UserManager {
 
     private static final String USER_FILE_PATH = "src/data/users.csv";
-    private Map<String, String> users = new HashMap<>();
+    private Map<String, User> users = new HashMap<>();
+    private User currentUser = null;
 
     public UserManager() {
         loadUsers();
@@ -23,21 +24,32 @@ public class UserManager {
             System.out.println("Username already exists!");
             return false;
         }
-        users.put(username, password);
+        User newUser = new User(username, password);
+        users.put(username, newUser);
         saveUsers();
         return true;
     }
 
     public boolean login(String username, String password) {
-        return users.containsKey(username) && users.get(username).equals(password);
+        User user = users.get(username);
+        if (user != null && user.getPassword().equals(password)) {
+            currentUser = user;
+            return true;
+        }
+        return false;
     }
 
     public void viewProfile(String username) {
-        if (users.containsKey(username)) {
-            System.out.println("Username: " + username);
+        User user = users.get(username);
+        if (user != null) {
+            System.out.println("Username: " + user.getUsername());
         } else {
             System.out.println("User not found!");
         }
+    }
+
+    public User getCurrentUser() {
+        return currentUser;
     }
 
     private void loadUsers() {
@@ -46,7 +58,8 @@ public class UserManager {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length == 2) {
-                    users.put(parts[0], parts[1]);
+                    User user = new User(parts[0], parts[1]);
+                    users.put(parts[0], user);
                 }
             }
         } catch (IOException e) {
@@ -56,8 +69,9 @@ public class UserManager {
 
     private void saveUsers() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(USER_FILE_PATH))) {
-            for (Map.Entry<String, String> entry : users.entrySet()) {
-                writer.write(entry.getKey() + "," + entry.getValue());
+            for (Map.Entry<String, User> entry : users.entrySet()) {
+                User user = entry.getValue();
+                writer.write(user.getUsername() + "," + user.getPassword());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -65,18 +79,7 @@ public class UserManager {
         }
     }
 
-    public static User getUserByUsername(String username) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(USER_FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 2 && parts[0].equals(username)) {
-                    return new User(parts[0], parts[1]);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading users!");
-        }
-        return null;
+    public User getUserByUsername(String username) {
+        return users.get(username);
     }
 }

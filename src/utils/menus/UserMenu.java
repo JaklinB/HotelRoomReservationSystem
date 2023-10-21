@@ -18,14 +18,12 @@ public class UserMenu {
     private final UserManager userManagement;
     private final RoomManager roomManager;
     private final BookingManager bookingManager;
-    private User currentUser;
     private final Scanner scanner;
 
-    public UserMenu(UserManager userManagement, RoomManager roomManager, BookingManager bookingManager, User currentUser) {
+    public UserMenu(UserManager userManagement, RoomManager roomManager, BookingManager bookingManager) {
         this.userManagement = userManagement;
         this.roomManager = roomManager;
         this.bookingManager = bookingManager;
-        this.currentUser = currentUser;
         this.scanner = new Scanner(System.in);
     }
 
@@ -53,7 +51,6 @@ public class UserMenu {
                     viewProfile();
                     break;
                 case 5:
-                    currentUser = null;
                     return;
                 default:
                     System.out.println("Invalid option. Please try again.");
@@ -105,9 +102,13 @@ public class UserMenu {
             if (roomIndex >= 0 && roomIndex < availableRooms.size()) {
                 Room selectedRoom = availableRooms.get(roomIndex);
                 String bookingID = UUID.randomUUID().toString();
-                Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), currentUser, checkInDate, checkOutDate);
-                bookingManager.addBooking(booking);
-                System.out.println("Booking successful!");
+                if (userManagement.getCurrentUser() != null) {
+                    Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), userManagement.getCurrentUser(), checkInDate, checkOutDate);
+                    bookingManager.addBooking(booking);
+                    System.out.println("Booking successful!");
+                } else {
+                    System.out.println("User not logged in. Please login first.");
+                }
             } else {
                 System.out.println("Invalid room selection.");
             }
@@ -115,16 +116,11 @@ public class UserMenu {
     }
 
     private void cancelBooking() {
-        if (currentUser == null) {
-            System.out.println("User not logged in. Please login first.");
-            return;
-        }
-
         System.out.println("\nBooking Cancellation");
         System.out.print("Enter booking ID: ");
         String bookingID = scanner.nextLine();
         Booking booking = bookingManager.getBookingByID(bookingID);
-        if (booking != null && booking.getUser().getUsername().equals(currentUser.getUsername())) {
+        if (booking != null && userManagement.getCurrentUser() != null && booking.getUser().getUsername().equals(userManagement.getCurrentUser().getUsername())) {
             Room room = roomManager.getRoomByRoomNumber(booking.getRoomNumber());
             if (room != null) {
                 double cancellationFee = room.getCancellationFee();
@@ -140,8 +136,8 @@ public class UserMenu {
 
     private void viewProfile() {
         System.out.println("\nUser Profile");
-        if (currentUser != null) {
-            userManagement.viewProfile(currentUser.getUsername());
+        if (userManagement.getCurrentUser() != null) {
+            userManagement.viewProfile(userManagement.getCurrentUser().getUsername());
         } else {
             System.out.println("User not logged in.");
         }

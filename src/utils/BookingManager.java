@@ -12,8 +12,10 @@ import java.util.List;
 public class BookingManager {
     private static final String BOOKING_FILE_PATH = "src/data/bookings.csv";
     private List<Booking> bookings;
+    private UserManager userManager;
 
-    public BookingManager() {
+    public BookingManager(UserManager userManager) {
+        this.userManager = userManager;
         bookings = new ArrayList<>();
         loadBookings();
     }
@@ -29,7 +31,7 @@ public class BookingManager {
                     String username = parts[2];
                     Date checkInDate = DateUtils.parseDate(parts[3]);
                     Date checkOutDate = DateUtils.parseDate(parts[4]);
-                    User user = UserManager.getUserByUsername(username);
+                    User user = userManager.getUserByUsername(username);
                     if (user != null) {
                         Booking booking = new Booking(bookingID, roomNumber, user, checkInDate, checkOutDate);
                         bookings.add(booking);
@@ -61,7 +63,6 @@ public class BookingManager {
             System.out.println("Error saving booking details!");
         }
     }
-
 
     public void addBooking(Booking booking) {
         bookings.add(booking);
@@ -95,5 +96,4 @@ public class BookingManager {
         }
         return userBookings;
     }
-
 }

@@ -20,9 +20,9 @@ public class Menu {
     public Menu() {
         userManagement = new UserManager();
         roomManager = new RoomManager();
-        bookingManager = new BookingManager();
+        bookingManager = new BookingManager(userManagement);
         adminManager = new AdminManager(roomManager, bookingManager);
-        userMenu = new UserMenu(userManagement, roomManager, bookingManager, currentUser);
+        userMenu = new UserMenu(userManagement, roomManager, bookingManager);
         adminMenu = new AdminMenu(roomManager, bookingManager, adminManager);
         currentUser = null;
         scanner = new Scanner(System.in);
