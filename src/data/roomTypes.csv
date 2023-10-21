@@ -1,0 +1,7 @@
+RoomNumber,RoomType,PricePerNight,CancellationFee,Status,Amenities,MaximumOccupancy
+101,DELUXE,150,50,AVAILABLE,"TV,WIFI,Balcony",2
+102,SUITE,250,50,AVAILABLE,"TV,WIFI,Kitchen,Balcony",4
+103,SINGLE,80,30,AVAILABLE,"TV,WIFI",1
+104,DOUBLE,110,40,AVAILABLE,"TV,WIFI,Balcony",2
+105,DELUXE,155,50,OCCUPIED,"TV,WIFI,Balcony",2
+106,SUITE,260,60,AVAILABLE,"TV,WIFI,Kitchen,Balcony,Minibar",4
