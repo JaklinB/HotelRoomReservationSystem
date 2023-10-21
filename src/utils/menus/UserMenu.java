@@ -19,6 +19,7 @@ public class UserMenu {
     private final RoomManager roomManager;
     private final BookingManager bookingManager;
     private final Scanner scanner;
+    private User currentUser;
 
     public UserMenu(UserManager userManagement, RoomManager roomManager, BookingManager bookingManager) {
         this.userManagement = userManagement;
@@ -27,7 +28,8 @@ public class UserMenu {
         this.scanner = new Scanner(System.in);
     }
 
-    public void start() {
+    public void start(User currentUser) {
+        this.currentUser = currentUser;
         while (true) {
             System.out.println("\nUser Menu");
             System.out.println("1. View Rooms");
@@ -102,8 +104,8 @@ public class UserMenu {
             if (roomIndex >= 0 && roomIndex < availableRooms.size()) {
                 Room selectedRoom = availableRooms.get(roomIndex);
                 String bookingID = UUID.randomUUID().toString();
-                if (userManagement.getCurrentUser() != null) {
-                    Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), userManagement.getCurrentUser(), checkInDate, checkOutDate);
+                if (currentUser != null) {
+                    Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), currentUser, checkInDate, checkOutDate);
                     bookingManager.addBooking(booking);
                     System.out.println("Booking successful!");
                 } else {
@@ -120,7 +122,7 @@ public class UserMenu {
         System.out.print("Enter booking ID: ");
         String bookingID = scanner.nextLine();
         Booking booking = bookingManager.getBookingByID(bookingID);
-        if (booking != null && userManagement.getCurrentUser() != null && booking.getUser().getUsername().equals(userManagement.getCurrentUser().getUsername())) {
+        if (booking != null && currentUser != null && booking.getUser().getUsername().equals(currentUser.getUsername())) {
             Room room = roomManager.getRoomByRoomNumber(booking.getRoomNumber());
             if (room != null) {
                 double cancellationFee = room.getCancellationFee();
@@ -136,8 +138,8 @@ public class UserMenu {
 
     private void viewProfile() {
         System.out.println("\nUser Profile");
-        if (userManagement.getCurrentUser() != null) {
-            userManagement.viewProfile(userManagement.getCurrentUser().getUsername());
+        if (currentUser != null) {
+            userManagement.viewProfile(currentUser.getUsername());
         } else {
             System.out.println("User not logged in.");
         }

@@ -21,6 +21,7 @@ public class Menu {
         userManagement = new UserManager();
         roomManager = new RoomManager();
         bookingManager = new BookingManager(userManagement);
+        userManagement.setBookingManager(bookingManager);
         adminManager = new AdminManager(roomManager, bookingManager);
         userMenu = new UserMenu(userManagement, roomManager, bookingManager);
         adminMenu = new AdminMenu(roomManager, bookingManager, adminManager);
@@ -82,11 +83,12 @@ public class Menu {
         if (userManagement.login(username, password)) {
             System.out.println("Login successful!");
             currentUser = new User(username, password);
-            userMenu.start();
+            userMenu.start(currentUser);
         } else {
             System.out.println("Login failed. Invalid username or password.");
         }
     }
+
 
     private void adminLogin() {
         System.out.println("\nAdmin Login");

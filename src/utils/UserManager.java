@@ -1,5 +1,6 @@
 package utils;
 
+import models.Booking;
 import models.User;
 
 import java.io.*;
@@ -7,49 +8,53 @@ import java.util.*;
 
 public class UserManager {
 
+
     private static final String USER_FILE_PATH = "src/data/users.csv";
     private Map<String, User> users = new HashMap<>();
-    private User currentUser = null;
+    private BookingManager bookingManager;
 
     public UserManager() {
         loadUsers();
     }
 
     public boolean register(String username, String password) {
-        if (!UserValidator.isValidUsername(username) || !UserValidator.isValidPassword(password)) {
-            System.out.println("Invalid username or password!");
-            return false;
-        }
         if (users.containsKey(username)) {
             System.out.println("Username already exists!");
             return false;
         }
-        User newUser = new User(username, password);
-        users.put(username, newUser);
+        users.put(username, new User(username, password));
         saveUsers();
         return true;
     }
 
     public boolean login(String username, String password) {
         User user = users.get(username);
-        if (user != null && user.getPassword().equals(password)) {
-            currentUser = user;
-            return true;
-        }
-        return false;
+        return user != null && user.getPassword().equals(password);
     }
 
     public void viewProfile(String username) {
         User user = users.get(username);
         if (user != null) {
             System.out.println("Username: " + user.getUsername());
+            List<Booking> userBookings = bookingManager.getBookingsByUser(user);
+            if (userBookings.isEmpty()) {
+                System.out.println("No bookings found for this user.");
+            } else {
+                System.out.println("Bookings:");
+                for (Booking booking : userBookings) {
+                    System.out.println("Booking ID: " + booking.getBookingID() +
+                            ", Room Number: " + booking.getRoomNumber() +
+                            ", Check-in Date: " + DateUtils.formatDate(booking.getCheckInDate()) +
+                            ", Check-out Date: " + DateUtils.formatDate(booking.getCheckOutDate()));
+                }
+            }
         } else {
             System.out.println("User not found!");
         }
     }
 
-    public User getCurrentUser() {
-        return currentUser;
+    public void setBookingManager(BookingManager bookingManager) {
+        this.bookingManager = bookingManager;
     }
 
     private void loadUsers() {
