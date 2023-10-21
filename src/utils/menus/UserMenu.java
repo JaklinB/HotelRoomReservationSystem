@@ -76,44 +76,73 @@ public class UserMenu {
 
     private void bookRoom() {
         System.out.println("\nRoom Booking");
-        System.out.print("Enter check-in date (yyyy-MM-dd): ");
-        Date checkInDate;
-        Date checkOutDate;
-        try {
-            checkInDate = DateUtils.parseDate(scanner.nextLine());
-            System.out.print("Enter check-out date (yyyy-MM-dd): ");
-            checkOutDate = DateUtils.parseDate(scanner.nextLine());
-        } catch (ParseException e) {
-            System.out.println("Invalid date format. Please use yyyy-MM-dd format for dates.");
+
+        Date checkInDate = promptForDate("Enter check-in date (yyyy-MM-dd): ");
+        if (checkInDate == null || !DateUtils.isDateInFuture(checkInDate)) {
+            System.out.println("Invalid check-in date. Date should be in the future.");
+            return;
+        }
+
+        Date checkOutDate = promptForDate("Enter check-out date (yyyy-MM-dd): ");
+        if (checkOutDate == null || !DateUtils.isValidDateRange(checkInDate, checkOutDate)) {
+            System.out.println("Invalid date range. Check-in date should be before check-out date.");
             return;
         }
 
         List<Room> availableRooms = roomManager.getAvailableRooms();
         if (availableRooms.isEmpty()) {
             System.out.println("No available rooms.");
+            return;
+        }
+
+        displayAvailableRooms(availableRooms);
+
+        int roomIndex = promptForRoomSelection(availableRooms.size());
+        if (roomIndex == -1) {
+            System.out.println("Invalid room selection.");
+            return;
+        }
+
+        Room selectedRoom = availableRooms.get(roomIndex);
+        createBooking(selectedRoom, checkInDate, checkOutDate);
+    }
+
+    private Date promptForDate(String message) {
+        System.out.print(message);
+        try {
+            return DateUtils.parseDate(scanner.nextLine());
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    private void displayAvailableRooms(List<Room> rooms) {
+        System.out.println("Available Rooms:");
+        for (int i = 0; i < rooms.size(); i++) {
+            Room room = rooms.get(i);
+            System.out.println((i + 1) + ". Room Number: " + room.getRoomNumber() +
+                    ", Room Type: " + room.getRoomType() +
+                    ", Price per Night: $" + room.getPricePerNight());
+        }
+    }
+
+    private int promptForRoomSelection(int roomCount) {
+        System.out.print("Select a room (1-" + roomCount + "): ");
+        int selection = Integer.parseInt(scanner.nextLine()) - 1;
+        if (selection >= 0 && selection < roomCount) {
+            return selection;
+        }
+        return -1;
+    }
+
+    private void createBooking(Room selectedRoom, Date checkInDate, Date checkOutDate) {
+        String bookingID = UUID.randomUUID().toString();
+        if (currentUser != null) {
+            Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), currentUser, checkInDate, checkOutDate);
+            bookingManager.addBooking(booking);
+            System.out.println("Booking successful!");
         } else {
-            System.out.println("Available Rooms:");
-            for (int i = 0; i < availableRooms.size(); i++) {
-                Room room = availableRooms.get(i);
-                System.out.println(i + 1 + ". Room Number: " + room.getRoomNumber() +
-                        ", Room Type: " + room.getRoomType() +
-                        ", Price per Night: $" + room.getPricePerNight());
-            }
-            System.out.print("Select a room (1-" + availableRooms.size() + "): ");
-            int roomIndex = Integer.parseInt(scanner.nextLine()) - 1;
-            if (roomIndex >= 0 && roomIndex < availableRooms.size()) {
-                Room selectedRoom = availableRooms.get(roomIndex);
-                String bookingID = UUID.randomUUID().toString();
-                if (currentUser != null) {
-                    Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), currentUser, checkInDate, checkOutDate);
-                    bookingManager.addBooking(booking);
-                    System.out.println("Booking successful!");
-                } else {
-                    System.out.println("User not logged in. Please login first.");
-                }
-            } else {
-                System.out.println("Invalid room selection.");
-            }
+            System.out.println("User not logged in. Please login first.");
         }
     }
 
