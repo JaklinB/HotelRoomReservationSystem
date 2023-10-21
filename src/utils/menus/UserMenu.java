@@ -76,11 +76,6 @@ public class UserMenu {
     }
 
     private void bookRoom() {
-        if (currentUser == null) {
-            System.out.println("User not logged in. Please login first.");
-            return;
-        }
-
         System.out.println("\nRoom Booking");
         System.out.print("Enter check-in date (yyyy-MM-dd): ");
         Date checkInDate;

@@ -8,6 +8,7 @@ import enums.RoomType;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RoomManager {
     private static final String ROOM_FILE_PATH = "src/data/rooms.csv";
@@ -40,7 +41,8 @@ public class RoomManager {
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error loading room details!");
+            System.out.println("Error loading room details from: " + ROOM_FILE_PATH);
+            e.printStackTrace();
         }
     }
 
@@ -48,12 +50,15 @@ public class RoomManager {
     private void saveRooms() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(ROOM_FILE_PATH))) {
             for (Room room : rooms) {
+                String amenitiesString = String.join(";", room.getAmenities().stream().map(Object::toString).collect(Collectors.toList()));
                 writer.write(
                         room.getRoomNumber() + "," +
                                 room.getRoomType() + "," +
                                 room.getPricePerNight() + "," +
                                 room.getCancellationFee() + "," +
-                                room.getStatus()
+                                room.getStatus() + "," +
+                                amenitiesString + "," +
+                                room.getMaximumOccupancy()
                 );
                 writer.newLine();
             }
@@ -78,19 +83,14 @@ public class RoomManager {
         System.out.println("Room not found for updating.");
     }
 
-    public boolean isRoomAvailable(String roomNumber) {
-        for (Room room : rooms) {
-            if (room.getRoomNumber().equals(roomNumber)) {
-                return room.getStatus() == RoomStatus.AVAILABLE;
-            }
-        }
-        return false;
+    public boolean isRoomAvailable(Room room) {
+        return room.getStatus() == RoomStatus.AVAILABLE;
     }
 
     public List<Room> getAvailableRooms() {
         List<Room> availableRooms = new ArrayList<>();
         for (Room room : rooms) {
-            if (room.getStatus() == RoomStatus.AVAILABLE) {
+            if (isRoomAvailable(room)) {
                 availableRooms.add(room);
             }
         }

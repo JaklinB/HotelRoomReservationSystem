@@ -43,22 +43,25 @@ public class BookingManager {
         }
     }
 
-    private void saveBookings() {
+    public void saveBookings() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(BOOKING_FILE_PATH))) {
             for (Booking booking : bookings) {
-                writer.write(
-                        booking.getBookingID() + "," +
-                                booking.getRoomNumber() + "," +
-                                booking.getUser().getUsername() + "," +
-                                DateUtils.formatDate(booking.getCheckInDate()) + "," +
-                                DateUtils.formatDate(booking.getCheckOutDate())
-                );
-                writer.newLine();
+                User user = booking.getUser();
+                if (user != null) {
+                    writer.write(
+                            booking.getBookingID() + "," +
+                                    booking.getRoomNumber() + "," +
+                                    booking.getUser().getUsername() + "," +
+                                    DateUtils.formatDate(booking.getCheckInDate()) + "," +
+                                    DateUtils.formatDate(booking.getCheckOutDate())
+                    );
+                }
             }
         } catch (IOException e) {
             System.out.println("Error saving booking details!");
         }
     }
+
 
     public void addBooking(Booking booking) {
         bookings.add(booking);
