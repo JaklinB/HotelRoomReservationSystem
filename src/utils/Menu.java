@@ -81,7 +81,7 @@ public class Menu {
         String password = scanner.nextLine();
 
         if (userManagement.login(username, password)) {
-            System.out.println("Login successful!");
+            System.out.println("Login successful! Hey, " + username + "!");
             currentUser = new User(username, password);
             userMenu.start(currentUser);
         } else {

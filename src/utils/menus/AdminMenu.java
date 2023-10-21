@@ -224,7 +224,7 @@ public class AdminMenu {
         RoomType newRoomType = getValidRoomType("Enter new room type (SINGLE, DOUBLE, SUITE, DELUXE): ");
         double newPricePerNight = getValidDouble("Enter new price per night: ");
         double newCancellationFee = getValidDouble("Enter new cancellation fee: ");
-        RoomStatus newRoomStatus = getValidRoomStatus("Enter new room status (AVAILABLE, OCCUPIED): ");
+        RoomStatus newRoomStatus = getValidRoomStatus("Enter new room status (AVAILABLE, BOOKED): ");
 
         room.setRoomType(newRoomType);
         room.setPricePerNight(newPricePerNight);
