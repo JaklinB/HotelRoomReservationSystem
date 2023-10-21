@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 public class BookingManager {
-    private static final String BOOKING_FILE_PATH = "C:\\Users\\user\\Desktop\\HotelRoomReservationSystem\\src\\data\\bookings.csv";
+    private static final String BOOKING_FILE_PATH = "src/data/bookings.csv";
     private List<Booking> bookings;
 
     public BookingManager() {

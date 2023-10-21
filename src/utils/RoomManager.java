@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoomManager {
-    private static final String ROOM_FILE_PATH = "C:\\Users\\user\\Desktop\\HotelRoomReservationSystem\\src\\data\\rooms.csv";
+    private static final String ROOM_FILE_PATH = "src/data/rooms.csv";
     private List<Room> rooms;
 
     public RoomManager() {
@@ -111,4 +111,3 @@ public class RoomManager {
         saveRooms();
     }
 }
-

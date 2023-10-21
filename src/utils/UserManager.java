@@ -7,7 +7,7 @@ import java.util.*;
 
 public class UserManager {
 
-    private static final String USER_FILE_PATH = "C:\\Users\\user\\Desktop\\HotelRoomReservationSystem\\src\\data\\users.csv";
+    private static final String USER_FILE_PATH = "src/data/users.csv";
     private Map<String, String> users = new HashMap<>();
 
     public UserManager() {
@@ -61,7 +61,7 @@ public class UserManager {
                 writer.newLine();
             }
         } catch (IOException e) {
-            System.out.println("Error saving users!");
+            System.out.println("Error saving users!" + e.toString());
         }
     }
 
