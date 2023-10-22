@@ -2,6 +2,10 @@
 package utils;
 
 import models.User;
+import utils.managers.AdminManager;
+import utils.managers.BookingManager;
+import utils.managers.RoomManager;
+import utils.managers.UserManager;
 import utils.menus.AdminMenu;
 import utils.menus.UserMenu;
 

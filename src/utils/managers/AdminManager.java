@@ -1,4 +1,4 @@
-package utils;
+package utils.managers;
 
 import models.Booking;
 import models.Room;

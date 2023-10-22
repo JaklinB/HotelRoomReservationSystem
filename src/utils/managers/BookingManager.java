@@ -1,8 +1,9 @@
-package utils;
+package utils.managers;
 
 import enums.RoomStatus;
 import models.Booking;
 import models.User;
+import utils.DateUtils;
 
 import java.io.*;
 import java.text.ParseException;

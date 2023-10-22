@@ -1,4 +1,4 @@
-package utils;
+package utils.managers;
 
 import enums.Amenities;
 import models.Room;

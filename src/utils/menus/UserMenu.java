@@ -3,10 +3,10 @@ package utils.menus;
 import models.Booking;
 import models.Room;
 import models.User;
-import utils.BookingManager;
+import utils.managers.BookingManager;
 import utils.DateUtils;
-import utils.RoomManager;
-import utils.UserManager;
+import utils.managers.RoomManager;
+import utils.managers.UserManager;
 
 import java.text.ParseException;
 import java.util.Date;

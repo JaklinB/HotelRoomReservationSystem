@@ -1,7 +1,9 @@
-package utils;
+package utils.managers;
 
 import models.Booking;
 import models.User;
+import utils.DateUtils;
+import utils.managers.BookingManager;
 
 import java.io.*;
 import java.util.*;

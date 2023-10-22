@@ -4,9 +4,9 @@ import models.Room;
 import enums.RoomStatus;
 import enums.RoomType;
 import enums.Amenities;
-import utils.AdminManager;
-import utils.BookingManager;
-import utils.RoomManager;
+import utils.managers.AdminManager;
+import utils.managers.BookingManager;
+import utils.managers.RoomManager;
 
 import java.util.ArrayList;
 import java.util.List;
