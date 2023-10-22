@@ -1,21 +1,22 @@
-package utils.menus;
+package menus;
 
 import enums.RoomStatus;
 import enums.RoomType;
 import enums.Amenities;
 import models.Room;
-import utils.managers.RoomManager;
+import controllers.RoomController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class ManageRoomsMenu {
-    private final RoomManager roomManager;
+    private final RoomController roomController;
     private final Scanner scanner;
 
-    public ManageRoomsMenu(RoomManager roomManager) {
-        this.roomManager = roomManager;
+    public ManageRoomsMenu(RoomController roomController) {
+        this.roomController = roomController;
         this.scanner = new Scanner(System.in);
     }
 
@@ -30,28 +31,20 @@ public class ManageRoomsMenu {
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
-                case 1:
-                    addRoom();
-                    break;
-                case 2:
-                    removeRoom();
-                    break;
-                case 3:
-                    modifyRoom();
-                    break;
-                case 4:
-                    viewAvailableRooms();
-                    break;
-                case 5:
+                case 1 -> addRoom();
+                case 2 -> removeRoom();
+                case 3 -> modifyRoom();
+                case 4 -> viewAvailableRooms();
+                case 5 -> {
                     return;
-                default:
-                    System.out.println("Invalid choice.");
+                }
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
 
     private void viewAvailableRooms() {
-        List<Room> availableRooms = roomManager.getAvailableRooms();
+        List<Room> availableRooms = roomController.getAvailableRooms();
         if (availableRooms.isEmpty()) {
             System.out.println("No available rooms.");
         } else {
@@ -104,7 +97,7 @@ public class ManageRoomsMenu {
 
         if (isValidRoomDetails(roomNumber, roomType, pricePerNight, cancellationFee, roomStatus, amenities, maximumOccupancy)) {
             Room room = new Room(roomNumber, roomType, pricePerNight, cancellationFee, roomStatus, amenities, maximumOccupancy);
-            roomManager.addRoom(room);
+            roomController.addRoom(room);
             System.out.println("Room added successfully!");
         } else {
             System.out.println("Room not saved due to missing or invalid details.");
@@ -112,7 +105,7 @@ public class ManageRoomsMenu {
     }
 
     private boolean isValidRoomDetails(String roomNumber, RoomType roomType, double pricePerNight, double cancellationFee, RoomStatus roomStatus, List<Amenities> amenities, int maximumOccupancy) {
-        if (roomNumber.isEmpty() || roomManager.getRoomByRoomNumber(roomNumber) != null) {
+        if (roomNumber.isEmpty() || roomController.getRoomByRoomNumber(roomNumber).isPresent()) {
             System.out.println("Either the room number is empty or a room with this number already exists.");
             return false;
         }
@@ -171,16 +164,16 @@ public class ManageRoomsMenu {
     private void removeRoom() {
         System.out.print("Enter room number to remove: ");
         String roomNumber = scanner.nextLine();
-        Room roomToDelete = roomManager.getRoomByRoomNumber(roomNumber);
-        roomManager.deleteRoom(roomToDelete);
+        Optional<Room> roomToDelete = roomController.getRoomByRoomNumber(roomNumber);
+        roomToDelete.ifPresent(roomController::deleteRoom);
     }
 
     private void modifyRoom() {
         System.out.print("Enter room number to modify: ");
         String roomNumber = scanner.nextLine();
-        Room room = roomManager.getRoomByRoomNumber(roomNumber);
+        Optional<Room> room = roomController.getRoomByRoomNumber(roomNumber);
 
-        if (room == null) {
+        if (room.isEmpty()) {
             System.out.println("Room not found!");
             return;
         }
@@ -190,11 +183,12 @@ public class ManageRoomsMenu {
         double newCancellationFee = getValidDouble("Enter new cancellation fee: ");
         RoomStatus newRoomStatus = getValidRoomStatus("Enter new room status (AVAILABLE, BOOKED): ");
 
-        room.setRoomType(newRoomType);
-        room.setPricePerNight(newPricePerNight);
-        room.setCancellationFee(newCancellationFee);
-        room.setStatus(newRoomStatus);
+        room.get().setRoomType(newRoomType);
+        room.get().setPricePerNight(newPricePerNight);
+        room.get().setCancellationFee(newCancellationFee);
+        room.get().setStatus(newRoomStatus);
 
-        roomManager.updateRoom(room);
+        roomController.updateRoom(room.get());
+
     }
 }

@@ -1,34 +1,31 @@
-package utils.menus;
+package menus;
 
 import models.Booking;
 import models.Room;
 import models.User;
-import utils.managers.BookingManager;
+import controllers.BookingController;
 import utils.DateUtils;
-import utils.managers.PromoCodeManager;
-import utils.managers.RoomManager;
-import utils.managers.UserManager;
+import controllers.PromoCodeController;
+import controllers.RoomController;
+import controllers.UserController;
 
 import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
-import java.util.UUID;
+import java.util.*;
 
 public class UserMenu {
-    private final UserManager userManagement;
-    private final RoomManager roomManager;
-    private final BookingManager bookingManager;
+    private final UserController userManagement;
+    private final RoomController roomController;
+    private final BookingController bookingController;
     private final Scanner scanner;
-    private final PromoCodeManager promoCodeManager;
+    private final PromoCodeController promoCodeController;
     private User currentUser;
 
-    public UserMenu(UserManager userManagement, RoomManager roomManager, BookingManager bookingManager) {
+    public UserMenu(UserController userManagement, RoomController roomController, BookingController bookingController) {
         this.userManagement = userManagement;
-        this.roomManager = roomManager;
-        this.bookingManager = bookingManager;
+        this.roomController = roomController;
+        this.bookingController = bookingController;
         this.scanner = new Scanner(System.in);
-        this.promoCodeManager = new PromoCodeManager();
+        this.promoCodeController = new PromoCodeController();
     }
 
     public void start(User currentUser) {
@@ -43,28 +40,20 @@ public class UserMenu {
             int option = Integer.parseInt(scanner.nextLine());
 
             switch (option) {
-                case 1:
-                    viewRooms();
-                    break;
-                case 2:
-                    bookRoom();
-                    break;
-                case 3:
-                    cancelBooking();
-                    break;
-                case 4:
-                    viewProfile();
-                    break;
-                case 5:
+                case 1 -> viewRooms();
+                case 2 -> bookRoom();
+                case 3 -> cancelBooking();
+                case 4 -> viewProfile();
+                case 5 -> {
                     return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+                }
+                default -> System.out.println("Invalid option. Please try again.");
             }
         }
     }
 
     private void viewRooms() {
-        List<Room> availableRooms = roomManager.getAvailableRooms();
+        List<Room> availableRooms = roomController.getAvailableRooms();
         if (availableRooms.isEmpty()) {
             System.out.println("No available rooms.");
         } else {
@@ -92,7 +81,7 @@ public class UserMenu {
             return;
         }
 
-        List<Room> availableRooms = roomManager.getAvailableRooms();
+        List<Room> availableRooms = roomController.getAvailableRooms();
         if (availableRooms.isEmpty()) {
             System.out.println("No available rooms.");
             return;
@@ -146,18 +135,18 @@ public class UserMenu {
 
         System.out.print("Do you have a promo code? (yes/no): ");
         String response = scanner.nextLine().trim().toLowerCase();
-        if ("yes".equals(response)) {
+        if ("yes".equalsIgnoreCase(response)) {
             System.out.print("Enter your promo code: ");
             String promoCode = scanner.nextLine().trim();
-            if (promoCodeManager.isValidPromoCode(promoCode)) {
-                double discount = promoCodeManager.getDiscountPercentage(promoCode);
+            if (promoCodeController.isValidPromoCode(promoCode)) {
+                double discount = promoCodeController.getDiscountPercentage(promoCode);
                 finalPrice -= (originalPrice * discount / 100);
                 System.out.println("Applied Promo Code! Original Price: $" + originalPrice + ", Discounted Price: $" + finalPrice);
             } else {
                 System.out.println("Invalid promo code. Using original price.");
                 System.out.println("Total Price: $" + finalPrice);
             }
-        } else if ("no".equals(response)) {
+        } else if ("no".equalsIgnoreCase(response)) {
             System.out.println("Total Price: $" + finalPrice);
         } else {
             System.out.println("Invalid answer. Total Price without promo code: $" + finalPrice);
@@ -165,7 +154,7 @@ public class UserMenu {
 
         if (currentUser != null) {
             Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), currentUser, checkInDate, checkOutDate);
-            bookingManager.addBooking(booking);
+            bookingController.addBooking(booking);
             System.out.println("Booking successful!");
         } else {
             System.out.println("User not logged in. Please login first.");
@@ -176,12 +165,12 @@ public class UserMenu {
         System.out.println("\nBooking Cancellation");
         System.out.print("Enter booking ID: ");
         String bookingID = scanner.nextLine();
-        Booking booking = bookingManager.getBookingByID(bookingID);
-        if (booking != null && currentUser != null && booking.getUser().getUsername().equals(currentUser.getUsername())) {
-            Room room = roomManager.getRoomByRoomNumber(booking.getRoomNumber());
-            if (room != null) {
-                double cancellationFee = room.getCancellationFee();
-                bookingManager.cancelBooking(booking);
+        Optional<Booking> booking = bookingController.getBookingByID(bookingID);
+        if (booking.isPresent() && currentUser != null && booking.get().getUser().getUsername().equals(currentUser.getUsername())) {
+            Optional<Room> room = roomController.getRoomByRoomNumber(booking.get().getRoomNumber());
+            if (room.isPresent()) {
+                double cancellationFee = room.get().getCancellationFee();
+                bookingController.cancelBooking(booking.get());
                 System.out.println("Booking canceled. Cancellation Fee: $" + cancellationFee);
             } else {
                 System.out.println("Room not found for the booking.");

@@ -1,21 +1,19 @@
-package utils.menus;
+package menus;
 
-import enums.Amenities;
 import models.PromoCode;
-import utils.managers.PromoCodeManager;
-import utils.managers.AdminManager;
+import controllers.PromoCodeController;
+import controllers.AdminController;
 
-import java.util.List;
 import java.util.Scanner;
 
 public class ManagePromoCodesMenu {
-    private final PromoCodeManager promoCodeManager;
+    private final PromoCodeController promoCodeController;
     private final Scanner scanner;
-    private final AdminManager adminManager;
+    private final AdminController adminController;
 
-    public ManagePromoCodesMenu(PromoCodeManager promoCodeManager, AdminManager adminManager) {
-        this.promoCodeManager = promoCodeManager;
-        this.adminManager = adminManager;
+    public ManagePromoCodesMenu(PromoCodeController promoCodeController, AdminController adminController) {
+        this.promoCodeController = promoCodeController;
+        this.adminController = adminController;
         this.scanner = new Scanner(System.in);
     }
 
@@ -29,19 +27,13 @@ public class ManagePromoCodesMenu {
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
-                case 1:
-                    addPromoCode();
-                    break;
-                case 2:
-                    removePromoCode();
-                    break;
-                case 3:
-                    adminManager.viewAllPromoCodes();
-                    break;
-                case 4:
+                case 1 -> addPromoCode();
+                case 2 -> removePromoCode();
+                case 3 -> adminController.viewAllPromoCodes();
+                case 4 -> {
                     return;
-                default:
-                    System.out.println("Invalid choice.");
+                }
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
@@ -53,7 +45,7 @@ public class ManagePromoCodesMenu {
         double codePercentage = getValidDiscountPercentage();
         if (codePercentage == -1) return;
 
-        promoCodeManager.addPromoCode(new PromoCode(codeName, codePercentage));
+        promoCodeController.addPromoCode(new PromoCode(codeName, codePercentage));
         System.out.println("Promo code added successfully!");
     }
 
@@ -75,7 +67,7 @@ public class ManagePromoCodesMenu {
     }
 
     private boolean promoCodeExists(String codeName) {
-        return promoCodeManager.getPromoCodeByName(codeName) != null;
+        return promoCodeController.getPromoCodeByName(codeName).isPresent();
     }
 
     private double getValidDiscountPercentage() {
@@ -96,6 +88,6 @@ public class ManagePromoCodesMenu {
     private void removePromoCode() {
         System.out.print("Enter promotional code to remove: ");
         String code = scanner.nextLine();
-        promoCodeManager.removePromoCode(code);
+        promoCodeController.removePromoCode(code);
     }
 }

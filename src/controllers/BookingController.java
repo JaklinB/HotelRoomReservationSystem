@@ -1,4 +1,4 @@
-package utils.managers;
+package controllers;
 
 import enums.RoomStatus;
 import models.Booking;
@@ -10,16 +10,17 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-public class BookingManager {
+public class BookingController {
     private static final String BOOKING_FILE_PATH = "src/data/bookings.csv";
-    private List<Booking> bookings;
-    private UserManager userManager;
-    private RoomManager roomManager;
+    private final List<Booking> bookings;
+    private final UserController userController;
+    private final RoomController roomController;
 
-    public BookingManager(UserManager userManager, RoomManager roomManager) {
-        this.userManager = userManager;
-        this.roomManager = roomManager;
+    public BookingController(UserController userController, RoomController roomController) {
+        this.userController = userController;
+        this.roomController = roomController;
         bookings = new ArrayList<>();
         loadBookings();
     }
@@ -27,15 +28,16 @@ public class BookingManager {
     private void loadBookings() {
         try (BufferedReader reader = new BufferedReader(new FileReader(BOOKING_FILE_PATH))) {
             String line;
+            String bookingDelimiter = ",";
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
+                String[] parts = line.split(bookingDelimiter);
                 if (parts.length == 5) {
                     String bookingID = parts[0];
                     String roomNumber = parts[1];
                     String username = parts[2];
                     Date checkInDate = DateUtils.parseDate(parts[3]);
                     Date checkOutDate = DateUtils.parseDate(parts[4]);
-                    User user = userManager.getUserByUsername(username);
+                    User user = userController.getUserByUsername(username);
                     if (user != null) {
                         Booking booking = new Booking(bookingID, roomNumber, user, checkInDate, checkOutDate);
                         bookings.add(booking);
@@ -54,7 +56,6 @@ public class BookingManager {
             for (Booking booking : bookings) {
                 User user = booking.getUser();
                 if (user != null) {
-                    roomManager.updateRoomStatus(booking.getRoomNumber(), RoomStatus.BOOKED);
                     writer.write(
                             booking.getBookingID() + "," +
                                     booking.getRoomNumber() + "," +
@@ -63,6 +64,7 @@ public class BookingManager {
                                     DateUtils.formatDate(booking.getCheckOutDate())
                     );
                     writer.newLine();
+                    roomController.updateRoomStatus(booking.getRoomNumber(), RoomStatus.BOOKED);
                 }
             }
         } catch (IOException e) {
@@ -75,18 +77,18 @@ public class BookingManager {
         saveBookings();
     }
 
-    public Booking getBookingByID(String bookingID) {
+    public Optional<Booking> getBookingByID(String bookingID) {
         for (Booking booking : bookings) {
             if (booking.getBookingID().equals(bookingID)) {
-                return booking;
+                return Optional.of(booking);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public void cancelBooking(Booking booking) {
-        roomManager.updateRoomStatus(booking.getRoomNumber(), RoomStatus.AVAILABLE);
         bookings.remove(booking);
+        roomController.updateRoomStatus(booking.getRoomNumber(), RoomStatus.AVAILABLE);
         saveBookings();
     }
 

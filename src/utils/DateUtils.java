@@ -6,10 +6,9 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class DateUtils {
-    private static final SimpleDateFormat DATE_FORMAT;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     static {
-        DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
         DATE_FORMAT.setLenient(false);
     }
 

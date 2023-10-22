@@ -1,18 +1,19 @@
 
-package utils.managers;
+package controllers;
 
 import models.PromoCode;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class PromoCodeManager {
+public class PromoCodeController {
 
     private static final String PROMO_CODES_CSV = "src/data/promo-codes.csv";
-    private List<PromoCode> promoCodes;
+    private final List<PromoCode> promoCodes;
 
-    public PromoCodeManager() {
+    public PromoCodeController() {
         promoCodes = new ArrayList<>();
         loadPromoCodes();
     }
@@ -23,9 +24,9 @@ public class PromoCodeManager {
     }
 
     public void removePromoCode(String code) {
-        PromoCode promoCodeToRemove = getPromoCodeByName(code);
-        if (promoCodeToRemove != null) {
-            promoCodes.remove(promoCodeToRemove);
+        Optional<PromoCode> promoCodeToRemove = getPromoCodeByName(code);
+        if (promoCodeToRemove.isPresent()) {
+            promoCodes.remove(promoCodeToRemove.get());
             savePromoCodes();
         }
     }
@@ -54,11 +55,12 @@ public class PromoCodeManager {
 
     private void loadPromoCodes() {
         File file = new File(PROMO_CODES_CSV);
+        String promoCodeDelimiter = ",";
         if (file.exists()) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
+                    String[] parts = line.split(promoCodeDelimiter);
                     if (parts.length == 2) {
                         String code = parts[0].trim();
                         double discount = Double.parseDouble(parts[1].trim());
@@ -66,7 +68,7 @@ public class PromoCodeManager {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Error when try to load promo code from file!");
             }
         }
     }
@@ -77,17 +79,17 @@ public class PromoCodeManager {
                 writer.println(promoCode.getCode() + "," + promoCode.getDiscountPercentage());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error when try to save promo code in file!");
         }
     }
 
-    public PromoCode getPromoCodeByName(String codeName) {
+    public Optional<PromoCode> getPromoCodeByName(String codeName) {
         for (PromoCode promoCode : promoCodes) {
             if (promoCode.getCode().equals(codeName)) {
-                return promoCode;
+                return Optional.of(promoCode);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
 }

@@ -1,4 +1,4 @@
-package utils.managers;
+package controllers;
 
 import enums.Amenities;
 import models.Room;
@@ -8,13 +8,15 @@ import enums.RoomType;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class RoomManager {
+public class RoomController {
     private static final String ROOM_FILE_PATH = "src/data/rooms.csv";
-    private List<Room> rooms;
+    private static final String DELIMITER = ",";
+    private final List<Room> rooms;
 
-    public RoomManager() {
+    public RoomController() {
         rooms = new ArrayList<>();
         loadRooms();
     }
@@ -22,15 +24,16 @@ public class RoomManager {
     private void loadRooms() {
         try (BufferedReader reader = new BufferedReader(new FileReader(ROOM_FILE_PATH))) {
             String line;
+            String amenitiesDelimiter = ";";
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
+                String[] parts = line.split(DELIMITER);
                 if (parts.length == 7) {
                     String roomNumber = parts[0];
                     RoomType roomType = RoomType.valueOf(parts[1]);
                     double pricePerNight = Double.parseDouble(parts[2]);
                     double cancellationFee = Double.parseDouble(parts[3]);
                     RoomStatus status = RoomStatus.valueOf(parts[4]);
-                    String[] amenitiesArray = parts[5].split(";");
+                    String[] amenitiesArray = parts[5].split(amenitiesDelimiter);
                     List<Amenities> amenities = new ArrayList<>();
                     for (String amenity : amenitiesArray) {
                         amenities.add(Amenities.valueOf(amenity));
@@ -42,7 +45,6 @@ public class RoomManager {
             }
         } catch (IOException e) {
             System.out.println("Error loading room details from: " + ROOM_FILE_PATH);
-            e.printStackTrace();
         }
     }
 
@@ -52,12 +54,12 @@ public class RoomManager {
             for (Room room : rooms) {
                 String amenitiesString = String.join(";", room.getAmenities().stream().map(Object::toString).collect(Collectors.toList()));
                 writer.write(
-                        room.getRoomNumber() + "," +
-                                room.getRoomType() + "," +
-                                room.getPricePerNight() + "," +
-                                room.getCancellationFee() + "," +
-                                room.getStatus() + "," +
-                                amenitiesString + "," +
+                        room.getRoomNumber() + DELIMITER +
+                                room.getRoomType() + DELIMITER +
+                                room.getPricePerNight() + DELIMITER +
+                                room.getCancellationFee() + DELIMITER +
+                                room.getStatus() + DELIMITER +
+                                amenitiesString + DELIMITER +
                                 room.getMaximumOccupancy()
                 );
                 writer.newLine();
@@ -97,13 +99,13 @@ public class RoomManager {
         return availableRooms;
     }
 
-    public Room getRoomByRoomNumber(String roomNumber) {
+    public Optional<Room> getRoomByRoomNumber(String roomNumber) {
         for (Room room : rooms) {
             if (room.getRoomNumber().equals(roomNumber)) {
-                return room;
+                return Optional.of(room);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public void deleteRoom(Room room) {

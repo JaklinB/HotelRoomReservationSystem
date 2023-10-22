@@ -1,33 +1,30 @@
-
-package utils;
-
 import models.User;
-import utils.managers.*;
-import utils.menus.AdminMenu;
-import utils.menus.UserMenu;
+import controllers.*;
+import menus.AdminMenu;
+import menus.UserMenu;
 
 import java.util.Scanner;
 
 public class Menu {
-    private final UserManager userManagement;
-    private final RoomManager roomManager;
-    private final BookingManager bookingManager;
-    private final AdminManager adminManager;
+    private final UserController userManagement;
+    private final RoomController roomController;
+    private final BookingController bookingController;
+    private final AdminController adminController;
     private final UserMenu userMenu;
     private final AdminMenu adminMenu;
-    private final PromoCodeManager promoCodeManager;
+    private final PromoCodeController promoCodeController;
     private User currentUser;
     private final Scanner scanner;
 
     public Menu() {
-        userManagement = new UserManager();
-        roomManager = new RoomManager();
-        bookingManager = new BookingManager(userManagement, roomManager);
-        userManagement.setBookingManager(bookingManager);
-        adminManager = new AdminManager(roomManager, bookingManager);
-        userMenu = new UserMenu(userManagement, roomManager, bookingManager);
-        promoCodeManager = new PromoCodeManager();
-        adminMenu = new AdminMenu(roomManager, bookingManager, adminManager, promoCodeManager);
+        userManagement = new UserController();
+        roomController = new RoomController();
+        bookingController = new BookingController(userManagement, roomController);
+        userManagement.setBookingManager(bookingController);
+        adminController = new AdminController(roomController, bookingController);
+        userMenu = new UserMenu(userManagement, roomController, bookingController);
+        promoCodeController = new PromoCodeController();
+        adminMenu = new AdminMenu(roomController, bookingController, adminController, promoCodeController);
         currentUser = null;
         scanner = new Scanner(System.in);
     }
@@ -44,20 +41,14 @@ public class Menu {
             int option = Integer.parseInt(scanner.nextLine());
 
             switch (option) {
-                case 1:
-                    register();
-                    break;
-                case 2:
-                    login();
-                    break;
-                case 3:
-                    adminLogin();
-                    break;
-                case 4:
+                case 1 -> register();
+                case 2 -> login();
+                case 3 -> adminLogin();
+                case 4 -> {
                     System.out.println("Goodbye!");
                     return;
-                default:
-                    System.out.println("Invalid option. Please try again.");
+                }
+                default -> System.out.println("Invalid option. Please try again.");
             }
         }
     }
@@ -94,10 +85,11 @@ public class Menu {
 
 
     private void adminLogin() {
+        String adminPass = "admin123";
         System.out.println("\nAdmin Login");
         System.out.print("Enter admin password: ");
         String password = scanner.nextLine();
-        if ("admin123".equals(password)) {
+        if (adminPass.equals(password)) {
             System.out.println("Admin login successful!");
             adminMenu.start();
         } else {

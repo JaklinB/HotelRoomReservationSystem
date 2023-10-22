@@ -6,7 +6,7 @@ import java.util.List;
 public class User {
     private String username;
     private String password;
-    private List<Booking> bookings;
+    private final List<Booking> bookings;
 
     public User(String username, String password) {
         this.username = username;

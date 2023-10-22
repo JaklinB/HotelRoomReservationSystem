@@ -1,8 +1,8 @@
-package utils.menus;
+package menus;
 
 import models.Booking;
 import utils.DateUtils;
-import utils.managers.BookingManager;
+import controllers.BookingController;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class SearchMenu {
-    private final BookingManager bookingManager;
+    private final BookingController bookingController;
     private final Scanner scanner;
 
-    public SearchMenu(BookingManager bookingManager) {
-        this.bookingManager = bookingManager;
+    public SearchMenu(BookingController bookingController) {
+        this.bookingController = bookingController;
         this.scanner = new Scanner(System.in);
     }
 
@@ -28,19 +28,13 @@ public class SearchMenu {
             int choice = Integer.parseInt(scanner.nextLine());
 
             switch (choice) {
-                case 1:
-                    searchByUserName();
-                    break;
-                case 2:
-                    searchByRoomNumber();
-                    break;
-                case 3:
-                    searchByDateRange();
-                    break;
-                case 4:
+                case 1 -> searchByUserName();
+                case 2 -> searchByRoomNumber();
+                case 3 -> searchByDateRange();
+                case 4 -> {
                     return;
-                default:
-                    System.out.println("Invalid choice.");
+                }
+                default -> System.out.println("Invalid choice.");
             }
         }
     }
@@ -48,14 +42,14 @@ public class SearchMenu {
     private void searchByUserName() {
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
-        List<Booking> bookings = bookingManager.searchBookingsByUsername(username);
+        List<Booking> bookings = bookingController.searchBookingsByUsername(username);
         displaySearchResults(bookings);
     }
 
     private void searchByRoomNumber() {
         System.out.print("Enter room number: ");
         String roomNumber = scanner.nextLine();
-        List<Booking> bookings = bookingManager.searchBookingsByRoomNumber(roomNumber);
+        List<Booking> bookings = bookingController.searchBookingsByRoomNumber(roomNumber);
         displaySearchResults(bookings);
     }
 
@@ -73,7 +67,7 @@ public class SearchMenu {
     private void searchByDateRange() {
         Date startDate = inputDate("Enter start date (yyyy-MM-dd): ");
         Date endDate = inputDate("Enter end date (yyyy-MM-dd): ");
-        List<Booking> bookings = bookingManager.searchBookingsByDateRange(startDate, endDate);
+        List<Booking> bookings = bookingController.searchBookingsByDateRange(startDate, endDate);
         displaySearchResults(bookings);
     }
 
