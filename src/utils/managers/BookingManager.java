@@ -62,6 +62,7 @@ public class BookingManager {
                                     DateUtils.formatDate(booking.getCheckInDate()) + "," +
                                     DateUtils.formatDate(booking.getCheckOutDate())
                     );
+                    writer.newLine();
                 }
             }
         } catch (IOException e) {

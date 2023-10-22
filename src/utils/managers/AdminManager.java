@@ -1,5 +1,6 @@
 package utils.managers;
 
+import enums.RoomStatus;
 import models.Booking;
 import models.Room;
 
@@ -35,12 +36,18 @@ public class AdminManager {
     }
 
     public void viewTotalIncome() {
+        if (roomManager == null) {
+            roomManager = new RoomManager();
+        }
+
         List<Booking> bookings = bookingManager.getAllBookings();
         double totalIncome = 0;
+
         for (Booking booking : bookings) {
             Room room = roomManager.getRoomByRoomNumber(booking.getRoomNumber());
-            if (room != null) {
-                totalIncome += room.getPricePerNight();
+            if (room != null && room.getStatus().equals(RoomStatus.BOOKED)) {
+                long daysBetween = (booking.getCheckOutDate().getTime() - booking.getCheckInDate().getTime()) / (1000 * 60 * 60 * 24);
+                totalIncome += room.getPricePerNight() * daysBetween;
             }
         }
         System.out.println("Total Income: $" + totalIncome);
