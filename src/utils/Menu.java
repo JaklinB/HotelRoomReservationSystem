@@ -2,10 +2,7 @@
 package utils;
 
 import models.User;
-import utils.managers.AdminManager;
-import utils.managers.BookingManager;
-import utils.managers.RoomManager;
-import utils.managers.UserManager;
+import utils.managers.*;
 import utils.menus.AdminMenu;
 import utils.menus.UserMenu;
 
@@ -18,6 +15,7 @@ public class Menu {
     private final AdminManager adminManager;
     private final UserMenu userMenu;
     private final AdminMenu adminMenu;
+    private final PromoCodeManager promoCodeManager;
     private User currentUser;
     private final Scanner scanner;
 
@@ -28,6 +26,7 @@ public class Menu {
         userManagement.setBookingManager(bookingManager);
         adminManager = new AdminManager(roomManager, bookingManager);
         userMenu = new UserMenu(userManagement, roomManager, bookingManager);
+        promoCodeManager = new PromoCodeManager();
         adminMenu = new AdminMenu(roomManager, bookingManager, adminManager);
         currentUser = null;
         scanner = new Scanner(System.in);

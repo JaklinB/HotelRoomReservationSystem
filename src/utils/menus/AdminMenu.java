@@ -1,11 +1,13 @@
 package utils.menus;
 
+import models.PromoCode;
 import models.Room;
 import enums.RoomStatus;
 import enums.RoomType;
 import enums.Amenities;
 import utils.managers.AdminManager;
 import utils.managers.BookingManager;
+import utils.managers.PromoCodeManager;
 import utils.managers.RoomManager;
 
 import java.util.ArrayList;
@@ -17,12 +19,14 @@ public class AdminMenu {
     private final BookingManager bookingManager;
     private final AdminManager adminManager;
     private final Scanner scanner;
+    private final PromoCodeManager promoCodeManager;
 
     public AdminMenu(RoomManager roomManager, BookingManager bookingManager, AdminManager adminManager) {
         this.roomManager = roomManager;
         this.bookingManager = bookingManager;
         this.adminManager = adminManager;
         this.scanner = new Scanner(System.in);
+        this.promoCodeManager = new PromoCodeManager();
     }
 
     public void start() {
@@ -259,11 +263,54 @@ public class AdminMenu {
         }
     }
 
+
     private void addPromoCode() {
-        System.out.print("Enter new promotional code: ");
-        String code = scanner.nextLine();
-        adminManager.addPromoCode(code);
+        String codeName = getValidPromoCodeName();
+        if (codeName == null) return;
+
+        double codePercentage = getValidDiscountPercentage();
+        if (codePercentage == -1) return;
+
+        adminManager.addPromoCode(new PromoCode(codeName, codePercentage));
+        System.out.println("Promo code added successfully!");
     }
+
+    private String getValidPromoCodeName() {
+        System.out.print("Enter new promotional code name: ");
+        String codeName = scanner.nextLine().trim();
+
+        if (codeName.isEmpty()) {
+            System.out.println("Promo code name cannot be empty.");
+            return null;
+        }
+
+        if (promoCodeExists(codeName)) {
+            System.out.println("A promo code with this name already exists. Please choose a unique name.");
+            return null;
+        }
+
+        return codeName;
+    }
+
+    private boolean promoCodeExists(String codeName) {
+        return promoCodeManager.getPromoCodeByName(codeName) != null;
+    }
+
+    private double getValidDiscountPercentage() {
+        System.out.print("Enter discount percentage for the promo code (0-100): ");
+        try {
+            double codePercentage = Double.parseDouble(scanner.nextLine().trim());
+            if (codePercentage < 0 || codePercentage > 100) {
+                System.out.println("Invalid percentage. Please enter a value between 0 and 100.");
+                return -1;
+            }
+            return codePercentage;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid percentage.");
+            return -1;
+        }
+    }
+
 
     private void removePromoCode() {
         System.out.print("Enter promotional code to remove: ");

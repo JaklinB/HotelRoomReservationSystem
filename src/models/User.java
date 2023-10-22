@@ -7,6 +7,7 @@ public class User {
     private String username;
     private String password;
     private List<Booking> bookings;
+    private PromoCode appliedPromoCode;
 
     public User(String username, String password) {
         this.username = username;
@@ -40,6 +41,14 @@ public class User {
 
     public void removeBooking(Booking booking) {
         bookings.remove(booking);
+    }
+
+    public PromoCode getAppliedPromoCode() {
+        return appliedPromoCode;
+    }
+
+    public void setAppliedPromoCode(PromoCode appliedPromoCode) {
+        this.appliedPromoCode = appliedPromoCode;
     }
 
 }

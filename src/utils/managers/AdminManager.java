@@ -2,20 +2,20 @@ package utils.managers;
 
 import enums.RoomStatus;
 import models.Booking;
+import models.PromoCode;
 import models.Room;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AdminManager {
     private RoomManager roomManager;
     private BookingManager bookingManager;
-    private List<String> promoCodes;
+    private PromoCodeManager promoCodeManager;
 
     public AdminManager(RoomManager roomManager, BookingManager bookingManager) {
         this.roomManager = roomManager;
         this.bookingManager = bookingManager;
-        this.promoCodes = new ArrayList<>();
+        this.promoCodeManager = new PromoCodeManager();
     }
 
     public void viewAllBookings() {
@@ -36,13 +36,8 @@ public class AdminManager {
     }
 
     public void viewTotalIncome() {
-        if (roomManager == null) {
-            roomManager = new RoomManager();
-        }
-
         List<Booking> bookings = bookingManager.getAllBookings();
         double totalIncome = 0;
-
         for (Booking booking : bookings) {
             Room room = roomManager.getRoomByRoomNumber(booking.getRoomNumber());
             if (room != null && room.getStatus().equals(RoomStatus.BOOKED)) {
@@ -85,9 +80,9 @@ public class AdminManager {
         }
     }
 
-    public void addPromoCode(String code) {
-        if (!promoCodes.contains(code)) {
-            promoCodes.add(code);
+    public void addPromoCode(PromoCode code) {
+        if (!promoCodeManager.isValidPromoCode(code.getCode())) {
+            promoCodeManager.addPromoCode(code);
             System.out.println("Promo code added successfully!");
         } else {
             System.out.println("Promo code already exists!");
@@ -95,8 +90,8 @@ public class AdminManager {
     }
 
     public void removePromoCode(String code) {
-        if (promoCodes.contains(code)) {
-            promoCodes.remove(code);
+        if (promoCodeManager.isValidPromoCode(code)) {
+            promoCodeManager.removePromoCode(code);
             System.out.println("Promo code removed successfully!");
         } else {
             System.out.println("Promo code not found!");
@@ -104,14 +99,13 @@ public class AdminManager {
     }
 
     public void viewAllPromoCodes() {
+        List<PromoCode> promoCodes = promoCodeManager.getAllPromoCodes();
         if (promoCodes.isEmpty()) {
             System.out.println("No promotional codes found.");
         } else {
-            for (String code : promoCodes) {
-                System.out.println(code);
+            for (PromoCode code : promoCodes) {
+                System.out.println(code.getCode());
             }
         }
     }
-
 }
-

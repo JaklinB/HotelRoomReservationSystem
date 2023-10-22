@@ -5,6 +5,7 @@ import models.Room;
 import models.User;
 import utils.managers.BookingManager;
 import utils.DateUtils;
+import utils.managers.PromoCodeManager;
 import utils.managers.RoomManager;
 import utils.managers.UserManager;
 
@@ -19,6 +20,7 @@ public class UserMenu {
     private final RoomManager roomManager;
     private final BookingManager bookingManager;
     private final Scanner scanner;
+    private final PromoCodeManager promoCodeManager;
     private User currentUser;
 
     public UserMenu(UserManager userManagement, RoomManager roomManager, BookingManager bookingManager) {
@@ -26,6 +28,7 @@ public class UserMenu {
         this.roomManager = roomManager;
         this.bookingManager = bookingManager;
         this.scanner = new Scanner(System.in);
+        this.promoCodeManager = new PromoCodeManager();
     }
 
     public void start(User currentUser) {
@@ -137,6 +140,27 @@ public class UserMenu {
 
     private void createBooking(Room selectedRoom, Date checkInDate, Date checkOutDate) {
         String bookingID = UUID.randomUUID().toString();
+        long numberOfNights = DateUtils.daysBetween(checkInDate, checkOutDate);
+        double originalPrice = selectedRoom.getPricePerNight() * numberOfNights;
+        double finalPrice = originalPrice;
+
+        System.out.print("Do you have a promo code? (yes/no): ");
+        String response = scanner.nextLine().trim().toLowerCase();
+        if ("yes".equals(response)) {
+            System.out.print("Enter your promo code: ");
+            String promoCode = scanner.nextLine().trim();
+            if (promoCodeManager.isValidPromoCode(promoCode)) {
+                double discount = promoCodeManager.getDiscountPercentage(promoCode);
+                finalPrice -= (originalPrice * discount / 100);
+                System.out.println("Applied Promo Code! Original Price: $" + originalPrice + ", Discounted Price: $" + finalPrice);
+            } else {
+                System.out.println("Invalid promo code. Using original price.");
+                System.out.println("Total Price: $" + finalPrice);
+            }
+        } else {
+            System.out.println("Total Price: $" + finalPrice);
+        }
+
         if (currentUser != null) {
             Booking booking = new Booking(bookingID, selectedRoom.getRoomNumber(), currentUser, checkInDate, checkOutDate);
             bookingManager.addBooking(booking);
