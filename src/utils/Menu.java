@@ -27,7 +27,7 @@ public class Menu {
         adminManager = new AdminManager(roomManager, bookingManager);
         userMenu = new UserMenu(userManagement, roomManager, bookingManager);
         promoCodeManager = new PromoCodeManager();
-        adminMenu = new AdminMenu(roomManager, bookingManager, adminManager);
+        adminMenu = new AdminMenu(roomManager, bookingManager, adminManager, promoCodeManager);
         currentUser = null;
         scanner = new Scanner(System.in);
     }

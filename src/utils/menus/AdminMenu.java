@@ -1,21 +1,10 @@
 package utils.menus;
 
-import models.Booking;
-import models.PromoCode;
-import models.Room;
-import enums.RoomStatus;
-import enums.RoomType;
-import enums.Amenities;
-import utils.DateUtils;
 import utils.managers.AdminManager;
 import utils.managers.BookingManager;
-import utils.managers.PromoCodeManager;
 import utils.managers.RoomManager;
+import utils.managers.PromoCodeManager;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Scanner;
 
 public class AdminMenu {
@@ -25,12 +14,12 @@ public class AdminMenu {
     private final Scanner scanner;
     private final PromoCodeManager promoCodeManager;
 
-    public AdminMenu(RoomManager roomManager, BookingManager bookingManager, AdminManager adminManager) {
+    public AdminMenu(RoomManager roomManager, BookingManager bookingManager, AdminManager adminManager, PromoCodeManager promoCodeManager) {
         this.roomManager = roomManager;
         this.bookingManager = bookingManager;
         this.adminManager = adminManager;
         this.scanner = new Scanner(System.in);
-        this.promoCodeManager = new PromoCodeManager();
+        this.promoCodeManager = promoCodeManager;
     }
 
     public void start() {
@@ -56,13 +45,13 @@ public class AdminMenu {
                     adminManager.viewTotalCancellationFees();
                     break;
                 case 4:
-                    manageRooms();
+                    new ManageRoomsMenu(roomManager).start();
                     break;
                 case 5:
-                    managePromoCodes();
+                    new ManagePromoCodesMenu(promoCodeManager, adminManager).start();
                     break;
                 case 6:
-                    searchBookings();
+                    new SearchMenu(bookingManager).start();
                     break;
                 case 7:
                     return;
@@ -71,331 +60,4 @@ public class AdminMenu {
             }
         }
     }
-
-    private void manageRooms() {
-        System.out.println("\nManage Rooms");
-        System.out.println("1. Add Room");
-        System.out.println("2. Remove Room");
-        System.out.println("3. Modify Room Details");
-        System.out.println("4. Return to Admin Menu");
-        int choice = Integer.parseInt(scanner.nextLine());
-
-        switch (choice) {
-            case 1:
-                addRoom();
-                break;
-            case 2:
-                removeRoom();
-                break;
-            case 3:
-                modifyRoom();
-                break;
-            case 4:
-                return;
-            default:
-                System.out.println("Invalid choice.");
-        }
-    }
-
-    private void viewRooms() {
-        List<Room> availableRooms = roomManager.getAvailableRooms();
-        if (availableRooms.isEmpty()) {
-            System.out.println("No available rooms.");
-        } else {
-            System.out.println("Available Rooms:");
-            for (Room room : availableRooms) {
-                System.out.println("Room Number: " + room.getRoomNumber() +
-                        ", Room Type: " + room.getRoomType() +
-                        ", Price per Night: $" + room.getPricePerNight());
-            }
-        }
-    }
-
-    private List<Amenities> parseAmenities(String input) {
-        String[] amenitiesArray = input.split(";");
-        List<Amenities> amenities = new ArrayList<>();
-        for (String amenity : amenitiesArray) {
-            try {
-                amenities.add(Amenities.valueOf(amenity.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                System.out.println("This amenity is not available: " + amenity + ". Skipping.");
-            }
-        }
-        return amenities;
-    }
-
-    private void addRoom() {
-        System.out.print("Enter room number: ");
-        String roomNumber = scanner.nextLine().trim();
-
-        RoomType roomType = getValidRoomType("Enter room type (SINGLE, DOUBLE, SUITE, DELUXE): ");
-
-        double pricePerNight = getValidDouble("Enter price per night: ");
-
-        double cancellationFee = getValidDouble("Enter cancellation fee: ");
-
-        RoomStatus roomStatus = getValidRoomStatus("Enter room status (AVAILABLE, BOOKED): ");
-
-        System.out.print("Enter amenities (separated by semicolons) \n " +
-                "Available amenities : \n " +
-                "    TV,\n" +
-                "    WIFI,\n" +
-                "    MiniBar,\n" +
-                "    Balcony,\n" +
-                "    RoomService,\n" +
-                "    GoodView: ");
-        String amenitiesInput = scanner.nextLine().trim();
-        List<Amenities> amenities = parseAmenities(amenitiesInput);
-
-        int maximumOccupancy = getValidInt("Enter maximum occupancy: ");
-
-        if (isValidRoomDetails(roomNumber, roomType, pricePerNight, cancellationFee, roomStatus, amenities, maximumOccupancy)) {
-            Room room = new Room(roomNumber, roomType, pricePerNight, cancellationFee, roomStatus, amenities, maximumOccupancy);
-            roomManager.addRoom(room);
-            System.out.println("Room added successfully!");
-        } else {
-            System.out.println("Room not saved due to missing or invalid details.");
-        }
-    }
-
-    private boolean isValidRoomDetails(String roomNumber, RoomType roomType, double pricePerNight, double cancellationFee, RoomStatus roomStatus, List<Amenities> amenities, int maximumOccupancy) {
-        if (roomNumber.isEmpty() || roomManager.getRoomByRoomNumber(roomNumber) != null) {
-            System.out.println("Either the room number is empty or a room with this number already exists.");
-            return false;
-        }
-        if (roomType == null || pricePerNight <= 0 || cancellationFee <= 0 || roomStatus == null || amenities == null || amenities.isEmpty() || maximumOccupancy <= 0) {
-            return false;
-        }
-        return true;
-    }
-
-
-    private RoomType getValidRoomType(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String roomTypeInput = scanner.nextLine();
-            try {
-                return RoomType.valueOf(roomTypeInput.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid room type: " + roomTypeInput);
-            }
-        }
-    }
-
-    private RoomStatus getValidRoomStatus(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String roomStatusInput = scanner.nextLine();
-            try {
-                return RoomStatus.valueOf(roomStatusInput.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                System.out.println("Invalid room status: " + roomStatusInput);
-            }
-        }
-    }
-
-    private double getValidDouble(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return Double.parseDouble(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input format. Please enter a valid number.");
-            }
-        }
-    }
-
-    private int getValidInt(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return Integer.parseInt(scanner.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input format. Please enter a valid integer.");
-            }
-        }
-    }
-
-    private void removeRoom() {
-        System.out.print("Enter room number to remove: ");
-        String roomNumber = scanner.nextLine();
-        Room roomToDelete = roomManager.getRoomByRoomNumber(roomNumber);
-        roomManager.deleteRoom(roomToDelete);
-    }
-
-    private void modifyRoom() {
-        System.out.print("Enter room number to modify: ");
-        String roomNumber = scanner.nextLine();
-        Room room = roomManager.getRoomByRoomNumber(roomNumber);
-
-        if (room == null) {
-            System.out.println("Room not found!");
-            return;
-        }
-
-        RoomType newRoomType = getValidRoomType("Enter new room type (SINGLE, DOUBLE, SUITE, DELUXE): ");
-        double newPricePerNight = getValidDouble("Enter new price per night: ");
-        double newCancellationFee = getValidDouble("Enter new cancellation fee: ");
-        RoomStatus newRoomStatus = getValidRoomStatus("Enter new room status (AVAILABLE, BOOKED): ");
-
-        room.setRoomType(newRoomType);
-        room.setPricePerNight(newPricePerNight);
-        room.setCancellationFee(newCancellationFee);
-        room.setStatus(newRoomStatus);
-
-        roomManager.updateRoom(room);
-    }
-
-    private void managePromoCodes() {
-        System.out.println("\nManage Promotional Codes");
-        System.out.println("1. Add Promotional Code");
-        System.out.println("2. Remove Promotional Code");
-        System.out.println("3. View All Promotional Codes");
-        System.out.println("4. Return to Admin Menu");
-        int choice = Integer.parseInt(scanner.nextLine());
-
-        switch (choice) {
-            case 1:
-                addPromoCode();
-                break;
-            case 2:
-                removePromoCode();
-                break;
-            case 3:
-                adminManager.viewAllPromoCodes();
-                break;
-            case 4:
-                return;
-            default:
-                System.out.println("Invalid choice.");
-        }
-    }
-
-
-    private void addPromoCode() {
-        String codeName = getValidPromoCodeName();
-        if (codeName == null) return;
-
-        double codePercentage = getValidDiscountPercentage();
-        if (codePercentage == -1) return;
-
-        adminManager.addPromoCode(new PromoCode(codeName, codePercentage));
-        System.out.println("Promo code added successfully!");
-    }
-
-    private String getValidPromoCodeName() {
-        System.out.print("Enter new promotional code name: ");
-        String codeName = scanner.nextLine().trim();
-
-        if (codeName.isEmpty()) {
-            System.out.println("Promo code name cannot be empty.");
-            return null;
-        }
-
-        if (promoCodeExists(codeName)) {
-            System.out.println("A promo code with this name already exists. Please choose a unique name.");
-            return null;
-        }
-
-        return codeName;
-    }
-
-    private boolean promoCodeExists(String codeName) {
-        return promoCodeManager.getPromoCodeByName(codeName) != null;
-    }
-
-    private double getValidDiscountPercentage() {
-        System.out.print("Enter discount percentage for the promo code (0-100): ");
-        try {
-            double codePercentage = Double.parseDouble(scanner.nextLine().trim());
-            if (codePercentage < 0 || codePercentage > 100) {
-                System.out.println("Invalid percentage. Please enter a value between 0 and 100.");
-                return -1;
-            }
-            return codePercentage;
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a valid percentage.");
-            return -1;
-        }
-    }
-
-
-    private void removePromoCode() {
-        System.out.print("Enter promotional code to remove: ");
-        String code = scanner.nextLine();
-        adminManager.removePromoCode(code);
-    }
-
-    private void searchBookings() {
-        System.out.println("\nSearch Bookings");
-        System.out.println("1. Search by Username");
-        System.out.println("2. Search by Room Number");
-        System.out.println("3. Search by Date Range");
-        System.out.println("4. Return to Admin Menu");
-        int choice = Integer.parseInt(scanner.nextLine());
-
-        switch (choice) {
-            case 1:
-                searchByUserName();
-                break;
-            case 2:
-                searchByRoomNumber();
-                break;
-            case 3:
-                searchByDateRange();
-                break;
-            case 4:
-                return;
-            default:
-                System.out.println("Invalid choice.");
-        }
-    }
-
-    private void searchByUserName() {
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        List<Booking> bookings = bookingManager.searchBookingsByUsername(username);
-        displaySearchResults(bookings);
-    }
-
-    private void searchByRoomNumber() {
-        System.out.print("Enter room number: ");
-        String roomNumber = scanner.nextLine();
-        List<Booking> bookings = bookingManager.searchBookingsByRoomNumber(roomNumber);
-        displaySearchResults(bookings);
-    }
-
-    private Date inputDate(String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                return DateUtils.parseDate(scanner.nextLine());
-            } catch (ParseException e) {
-                System.out.println("Invalid date format. Please use yyyy-MM-dd format.");
-            }
-        }
-    }
-    private void searchByDateRange() {
-        Date startDate = inputDate("Enter start date (yyyy-MM-dd): ");
-        Date endDate = inputDate("Enter end date (yyyy-MM-dd): ");
-        List<Booking> bookings = bookingManager.searchBookingsByDateRange(startDate, endDate);
-        displaySearchResults(bookings);
-    }
-
-
-    private void displaySearchResults(List<Booking> bookings) {
-        if (bookings.isEmpty()) {
-            System.out.println("No bookings found.");
-            return;
-        }
-
-        for (Booking booking : bookings) {
-            System.out.println("\nBooking ID: " + booking.getBookingID());
-            System.out.println("Room Number: " + booking.getRoomNumber());
-            System.out.println("Username: " + booking.getUser().getUsername());
-            System.out.println("Check-In Date: " + booking.getCheckInDate());
-            System.out.println("Check-Out Date: " + booking.getCheckOutDate());
-        }
-    }
-
 }

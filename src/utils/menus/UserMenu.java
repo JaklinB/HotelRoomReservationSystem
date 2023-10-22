@@ -157,8 +157,10 @@ public class UserMenu {
                 System.out.println("Invalid promo code. Using original price.");
                 System.out.println("Total Price: $" + finalPrice);
             }
-        } else {
+        } else if ("no".equals(response)) {
             System.out.println("Total Price: $" + finalPrice);
+        } else {
+            System.out.println("Invalid answer. Total Price without promo code: $" + finalPrice);
         }
 
         if (currentUser != null) {
