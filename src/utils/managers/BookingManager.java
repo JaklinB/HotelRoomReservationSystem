@@ -103,4 +103,35 @@ public class BookingManager {
         }
         return userBookings;
     }
+
+    public List<Booking> searchBookingsByUsername(String username) {
+        List<Booking> filteredBookings = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if (booking.getUser().getUsername().equalsIgnoreCase(username)) {
+                filteredBookings.add(booking);
+            }
+        }
+        return filteredBookings;
+    }
+
+    public List<Booking> searchBookingsByRoomNumber(String roomNumber) {
+        List<Booking> filteredBookings = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if (booking.getRoomNumber().equals(roomNumber)) {
+                filteredBookings.add(booking);
+            }
+        }
+        return filteredBookings;
+    }
+
+    public List<Booking> searchBookingsByDateRange(Date startDate, Date endDate) {
+        List<Booking> filteredBookings = new ArrayList<>();
+        for (Booking booking : bookings) {
+            if ((booking.getCheckInDate().after(startDate) || booking.getCheckInDate().equals(startDate)) &&
+                    (booking.getCheckOutDate().before(endDate) || booking.getCheckOutDate().equals(endDate))) {
+                filteredBookings.add(booking);
+            }
+        }
+        return filteredBookings;
+    }
 }

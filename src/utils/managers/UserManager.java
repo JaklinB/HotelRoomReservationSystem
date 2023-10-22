@@ -9,8 +9,6 @@ import java.io.*;
 import java.util.*;
 
 public class UserManager {
-
-
     private static final String USER_FILE_PATH = "src/data/users.csv";
     private Map<String, User> users = new HashMap<>();
     private BookingManager bookingManager;

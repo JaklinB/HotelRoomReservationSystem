@@ -1,16 +1,20 @@
 package utils.menus;
 
+import models.Booking;
 import models.PromoCode;
 import models.Room;
 import enums.RoomStatus;
 import enums.RoomType;
 import enums.Amenities;
+import utils.DateUtils;
 import utils.managers.AdminManager;
 import utils.managers.BookingManager;
 import utils.managers.PromoCodeManager;
 import utils.managers.RoomManager;
 
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -37,7 +41,8 @@ public class AdminMenu {
             System.out.println("3. View Total Cancellation Fees");
             System.out.println("4. Manage Rooms");
             System.out.println("5. Manage Promotional Codes");
-            System.out.println("6. Logout");
+            System.out.println("6. Search");
+            System.out.println("7. Logout");
             int option = Integer.parseInt(scanner.nextLine());
 
             switch (option) {
@@ -57,6 +62,9 @@ public class AdminMenu {
                     managePromoCodes();
                     break;
                 case 6:
+                    searchBookings();
+                    break;
+                case 7:
                     return;
                 default:
                     System.out.println("Invalid option. Please try again.");
@@ -316,6 +324,78 @@ public class AdminMenu {
         System.out.print("Enter promotional code to remove: ");
         String code = scanner.nextLine();
         adminManager.removePromoCode(code);
+    }
+
+    private void searchBookings() {
+        System.out.println("\nSearch Bookings");
+        System.out.println("1. Search by Username");
+        System.out.println("2. Search by Room Number");
+        System.out.println("3. Search by Date Range");
+        System.out.println("4. Return to Admin Menu");
+        int choice = Integer.parseInt(scanner.nextLine());
+
+        switch (choice) {
+            case 1:
+                searchByUserName();
+                break;
+            case 2:
+                searchByRoomNumber();
+                break;
+            case 3:
+                searchByDateRange();
+                break;
+            case 4:
+                return;
+            default:
+                System.out.println("Invalid choice.");
+        }
+    }
+
+    private void searchByUserName() {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        List<Booking> bookings = bookingManager.searchBookingsByUsername(username);
+        displaySearchResults(bookings);
+    }
+
+    private void searchByRoomNumber() {
+        System.out.print("Enter room number: ");
+        String roomNumber = scanner.nextLine();
+        List<Booking> bookings = bookingManager.searchBookingsByRoomNumber(roomNumber);
+        displaySearchResults(bookings);
+    }
+
+    private Date inputDate(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                return DateUtils.parseDate(scanner.nextLine());
+            } catch (ParseException e) {
+                System.out.println("Invalid date format. Please use yyyy-MM-dd format.");
+            }
+        }
+    }
+    private void searchByDateRange() {
+        Date startDate = inputDate("Enter start date (yyyy-MM-dd): ");
+        Date endDate = inputDate("Enter end date (yyyy-MM-dd): ");
+        List<Booking> bookings = bookingManager.searchBookingsByDateRange(startDate, endDate);
+        displaySearchResults(bookings);
+    }
+
+
+    private void displaySearchResults(List<Booking> bookings) {
+        if (bookings.isEmpty()) {
+            System.out.println("No bookings found.");
+            return;
+        }
+
+        for (Booking booking : bookings) {
+            System.out.println("\nBooking ID: " + booking.getBookingID());
+            System.out.println("Room Number: " + booking.getRoomNumber());
+            System.out.println("Username: " + booking.getUser().getUsername());
+            System.out.println("Check-In Date: " + booking.getCheckInDate());
+            System.out.println("Check-Out Date: " + booking.getCheckOutDate());
+        }
     }
 
 }
