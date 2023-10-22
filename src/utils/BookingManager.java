@@ -1,5 +1,6 @@
 package utils;
 
+import enums.RoomStatus;
 import models.Booking;
 import models.User;
 
@@ -13,9 +14,11 @@ public class BookingManager {
     private static final String BOOKING_FILE_PATH = "src/data/bookings.csv";
     private List<Booking> bookings;
     private UserManager userManager;
+    private RoomManager roomManager;
 
-    public BookingManager(UserManager userManager) {
+    public BookingManager(UserManager userManager, RoomManager roomManager) {
         this.userManager = userManager;
+        this.roomManager = roomManager;
         bookings = new ArrayList<>();
         loadBookings();
     }
@@ -50,6 +53,7 @@ public class BookingManager {
             for (Booking booking : bookings) {
                 User user = booking.getUser();
                 if (user != null) {
+                    roomManager.updateRoomStatus(booking.getRoomNumber(), RoomStatus.BOOKED);
                     writer.write(
                             booking.getBookingID() + "," +
                                     booking.getRoomNumber() + "," +
@@ -79,6 +83,7 @@ public class BookingManager {
     }
 
     public void cancelBooking(Booking booking) {
+        roomManager.updateRoomStatus(booking.getRoomNumber(), RoomStatus.AVAILABLE);
         bookings.remove(booking);
         saveBookings();
     }

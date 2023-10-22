@@ -110,4 +110,14 @@ public class RoomManager {
         rooms.remove(room);
         saveRooms();
     }
+
+    public void updateRoomStatus(String roomNumber, RoomStatus status) {
+        for (Room room : rooms) {
+            if (room.getRoomNumber().equals(roomNumber)) {
+                room.setStatus(status);
+                saveRooms();
+                break;
+            }
+        }
+    }
 }

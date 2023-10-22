@@ -20,7 +20,7 @@ public class Menu {
     public Menu() {
         userManagement = new UserManager();
         roomManager = new RoomManager();
-        bookingManager = new BookingManager(userManagement);
+        bookingManager = new BookingManager(userManagement, roomManager);
         userManagement.setBookingManager(bookingManager);
         adminManager = new AdminManager(roomManager, bookingManager);
         userMenu = new UserMenu(userManagement, roomManager, bookingManager);
